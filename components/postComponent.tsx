@@ -3,18 +3,19 @@ import { useEffect, useState } from "react";
 import Image from "next/legacy/image";
 import Head from "next/head";
 
-interface EventData {
+interface PostComponentProps {
   id: number;
   title: string;
   description: string;
   imageUrl: string[];
 }
 
-interface PostComponentProps {
-  eventData: EventData;
-}
-
-const PostComponent: React.FC<PostComponentProps> = ({ eventData }) => {
+const PostComponent: React.FC<PostComponentProps> = ({
+  id,
+  title,
+  description,
+  imageUrl,
+}) => {
   const [error, setError] = useState(false);
   const [liked, setLiked] = useState(false);
   const [favorited, setFavorited] = useState(false);
@@ -25,17 +26,13 @@ const PostComponent: React.FC<PostComponentProps> = ({ eventData }) => {
 
   const handlePrevious = () => {
     const newIndex =
-      currentImageIndex > 0
-        ? currentImageIndex - 1
-        : eventData.imageUrl.length - 1;
+      currentImageIndex > 0 ? currentImageIndex - 1 : imageUrl.length - 1;
     setCurrentImageIndex(newIndex);
   };
 
   const handleNext = () => {
     const newIndex =
-      currentImageIndex < eventData.imageUrl.length - 1
-        ? currentImageIndex + 1
-        : 0;
+      currentImageIndex < imageUrl.length - 1 ? currentImageIndex + 1 : 0;
     setCurrentImageIndex(newIndex);
   };
 
@@ -58,9 +55,7 @@ const PostComponent: React.FC<PostComponentProps> = ({ eventData }) => {
   };
 
   const nextImage = () => {
-    setCurrentImageIndex(
-      (prevIndex) => (prevIndex + 1) % eventData.imageUrl.length
-    );
+    setCurrentImageIndex((prevIndex) => (prevIndex + 1) % imageUrl.length);
   };
 
   return (
@@ -71,15 +66,15 @@ const PostComponent: React.FC<PostComponentProps> = ({ eventData }) => {
       <div className='fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 backdrop-blur-sm'>
         <div className='bg-white shadow-lg rounded-lg overflow-hidden w-11/12 max-w-5xl max-h-120vh flex flex-col md:flex-row'>
           <div className='relative flex-1 md:flex-1.5 flex justify-center items-center'>
-            {eventData.imageUrl.length > 0 && (
+            {imageUrl.length > 0 && (
               <div className='relative w-full h-full'>
                 <Image
-                  src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/images/${eventData.imageUrl[currentImageIndex]}`}
-                  alt={eventData.title}
+                  src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/images/${imageUrl[currentImageIndex]}`}
+                  alt={title}
                   className='rounded-t md:rounded-none md:rounded-l object-cover w-full h-full relative'
                   layout='fill'
                 />
-                {eventData.imageUrl.length > 1 && ( // Condition to check if there are more than one image
+                {imageUrl.length > 1 && ( // Condition to check if there are more than one image
                   <div className='absolute inset-0 flex justify-between items-center'>
                     <button
                       className='w-10 h-10 bg-black bg-opacity-75 text-white flex items-center justify-center rounded-full'
@@ -98,7 +93,7 @@ const PostComponent: React.FC<PostComponentProps> = ({ eventData }) => {
                   </div>
                 )}
                 <span className='absolute top-4 right-4 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-xs'>
-                  {`${currentImageIndex + 1}/${eventData.imageUrl.length}`}
+                  {`${currentImageIndex + 1}/${imageUrl.length}`}
                 </span>
               </div>
             )}
@@ -116,10 +111,8 @@ const PostComponent: React.FC<PostComponentProps> = ({ eventData }) => {
               </div>
             </div>
             <div className='flex-1 overflow-y-auto'>
-              <h4 className='text-lg font-bold mb-4 text-black'>
-                {eventData.title}
-              </h4>
-              <div className='preformatted-text'>{eventData.description}</div>
+              <h4 className='text-lg font-bold mb-4 text-black'>{title}</h4>
+              <div className='preformatted-text'>{description}</div>
               <p className='text-xs text-gray-500'>{datePosted}</p>
             </div>
             <div className='flex justify-end items-center space-x-4 mt-4'>
