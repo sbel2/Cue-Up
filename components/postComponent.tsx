@@ -3,6 +3,7 @@ import React from "react";
 import { useEffect, useState } from "react";
 import Head from "next/head";
 import Linkify from 'react-linkify';
+import useSWR from 'swr';
 
 interface EventData {
   id: number;
@@ -12,15 +13,16 @@ interface EventData {
 }
 
 interface PostComponentProps {
-  eventData: EventData;
+  eventId: number;
 }
 
-const linkDecorator = (href: string, text: string, key: number): React.ReactNode => {
-  // Validate the URL
-  if (!isValidUrl(href)) {
-    return <span key={key}>{text}</span>;  // Just return text if URL is invalid
-  }
+// Implement the SWR library from Vercel to fetch data in the client-side
+const fetcher = (url: string) => fetch(url).then(res => res.json());
 
+const linkDecorator = (href: string, text: string, key: number): React.ReactNode => {
+  if (!isValidUrl(href)) {
+    return <span key={key}>{text}</span>;
+  }
   return (
     <a href={href} key={key} target="_blank" rel="noopener noreferrer" style={{ color: 'blue', textDecoration: 'underline' }}>
       {text}
@@ -28,18 +30,17 @@ const linkDecorator = (href: string, text: string, key: number): React.ReactNode
   );
 };
 
-// Simple URL validation function
 function isValidUrl(string: string): boolean {
   try {
     new URL(string);
   } catch (_) {
-    return false;  // Malformed URL
+    return false;
   }
-  // Add more sophisticated checks like domain whitelist, etc.
   return true;
 }
 
-const PostComponent: React.FC<PostComponentProps> = ({ eventData }) => {
+const PostComponent: React.FC<PostComponentProps> = ({ eventId }) => {
+  const { data: eventData, error } = useSWR<EventData>(`/api/events/${eventId}`, fetcher);
   const [liked, setLiked] = useState(false);
   const [favorited, setFavorited] = useState(false);
   const [likesCount, setLikesCount] = useState(0);
@@ -48,9 +49,12 @@ const PostComponent: React.FC<PostComponentProps> = ({ eventData }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
-    const today = new Date().toISOString().slice(0, 10); // Get only the date part
+    const today = new Date().toISOString().slice(0, 10);
     setDatePosted(today);
   }, []);
+
+  if (error) return <div>Failed to load event data</div>;
+  if (!eventData) return <div>Loading...</div>;
 
   const handlePrevious = () => {
     const newIndex =
@@ -86,37 +90,31 @@ const PostComponent: React.FC<PostComponentProps> = ({ eventData }) => {
     setFavorited(!favorited);
   };
 
-  const nextImage = () => {
-    setCurrentImageIndex(
-      (prevIndex) => (prevIndex + 1) % eventData.imageUrl.length
-    );
-  };
-
   return (
     <>
       <Head>
         <title>Post Detail</title>
       </Head>
-      <div className= 'post-container'>
-        <div className = 'card'>
-        <div className='image-container'>
+      <div className='post-container'>
+        <div className='card'>
+          <div className='image-container'>
             {eventData.imageUrl.length > 0 && (
-                <img
-                    src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/images/${eventData.imageUrl[currentImageIndex]}`}
-                    alt={eventData.title}
-                    className='rounded-t md:rounded-none md:rounded-l object-contain w-full h-full relative'
-                />
+              <img
+                src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/images/${eventData.imageUrl[currentImageIndex]}`}
+                alt={eventData.title}
+                className='rounded-t md:rounded-none md:rounded-l object-contain w-full h-full relative'
+              />
             )}
             {eventData.imageUrl.length > 1 && (
-                <div className='navigation'>
-                    <button className='nav-button' onClick={handlePrevious} aria-label='Previous Image'>&lt;</button>
-                    <button className='nav-button' onClick={handleNext} aria-label='Next Image'>&gt;</button>
-                </div>
+              <div className='navigation'>
+                <button className='nav-button' onClick={handlePrevious} aria-label='Previous Image'>&lt;</button>
+                <button className='nav-button' onClick={handleNext} aria-label='Next Image'>&gt;</button>
+              </div>
             )}
             <span className='absolute top-4 right-4 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-xs'>
-                {`${currentImageIndex + 1}/${eventData.imageUrl.length}`}
+              {`${currentImageIndex + 1}/${eventData.imageUrl.length}`}
             </span>
-        </div>
+          </div>
 
           <div className='text-container'>
             <div className='profile-header'>
@@ -141,7 +139,7 @@ const PostComponent: React.FC<PostComponentProps> = ({ eventData }) => {
             <div className='footer'>
               <button className='icon-button' onClick={handleLike}>
                 {liked ? (
-                  <svg fill='red' stroke = "red" stroke-width = '2' viewBox='0 0 24 24' className='icon'>
+                  <svg fill='red' stroke="red" strokeWidth='2' viewBox='0 0 24 24' className='icon'>
                     <path d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z' />
                   </svg>
                 ) : (
@@ -158,19 +156,18 @@ const PostComponent: React.FC<PostComponentProps> = ({ eventData }) => {
                 <span className='icon-text'>{likesCount}</span>
               </button>
               <button className='icon-button' onClick={handleFavorite}>
-                  {favorited ? (
-                      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="#FFD700" stroke="#FFD700" stroke-width = "2" className='icon'>
-                          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-                      </svg>
-                  ) : (
-                      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" className='icon'>
-                          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-                      </svg>
-                  )}
-                  <span className='icon-text'>{favoritesCount}</span>
+                {favorited ? (
+                  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="#FFD700" stroke="#FFD700" strokeWidth="2" className='icon'>
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                  </svg>
+                ) : (
+                  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" strokeWidth="2" className='icon'>
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                  </svg>
+                )}
+                <span className='icon-text'>{favoritesCount}</span>
               </button>
             </div>
-
           </div>
           <button
             className='absolute top-5 right-5 bg-gray-600 bg-opacity-50 text-white p-1 rounded-full flex items-center justify-center'
