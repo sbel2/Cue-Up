@@ -16,7 +16,8 @@ interface PostComponentProps {
   eventId: number;
 }
 
-// Implement the SWR library from Vercel to fetch data in the client-side
+// Implement the SWR library from Vercel to fetch data in the client-side.
+// Use SWR to fetch data.
 const fetcher = (url: string) => fetch(url).then(res => res.json());
 
 const linkDecorator = (href: string, text: string, key: number): React.ReactNode => {
@@ -40,6 +41,7 @@ function isValidUrl(string: string): boolean {
 }
 
 const PostComponent: React.FC<PostComponentProps> = ({ eventId }) => {
+  // Utilize useSWR to fetch event data dynamically based on the eventId
   const { data: eventData, error } = useSWR<EventData>(`/api/events/${eventId}`, fetcher);
   const [liked, setLiked] = useState(false);
   const [favorited, setFavorited] = useState(false);
