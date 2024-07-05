@@ -58,3 +58,22 @@
 .image-container:hover .overlay {
   opacity: 1;
 }
+
+.icon {
+  width: 23px;
+  height: 23px;
+  margin-right: 8px; /* Space between icon and text */
+  stroke-width: 1.25; /* Ensure stroke width is consistent */
+  flex-shrink: 0; /* Prevents icon from shrinking */
+  transition: fill 0.2s; /* Smooth fill transition */
+  }
+
+.icon-text {
+    font-size: 12px; /* Adjust font size as needed */
+    display: inline-block;
+    width: 15px;
+    text-align: center;
+}
+
+
+  
