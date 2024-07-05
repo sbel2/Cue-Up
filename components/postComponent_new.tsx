@@ -134,6 +134,7 @@ const PostPage: React.FC<Post> = ({
             </button>
             <span>{likesCount}</span>
           </div>
+          <div className="text-black">{created_at}</div>
         </div>
       </div>
     </div>
