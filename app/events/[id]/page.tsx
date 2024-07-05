@@ -1,5 +1,6 @@
 import PostComponent from '@/components/postComponent_new';
 import { createClient } from '@/supabase/client';
+import { notFound } from 'next/navigation';
 
 export default async function Page({ params }: { params: { id: string } }) {
   const { id: post_id } = params;
@@ -10,6 +11,10 @@ export default async function Page({ params }: { params: { id: string } }) {
     .select()
     .match({ post_id })
     .single();
+
+  if (!postData || error) {
+    return notFound();
+  }
   return (
     <div>
       <PostComponent {...postData} />
