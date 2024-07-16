@@ -50,14 +50,21 @@ const PostPage: React.FC<Post> = ({
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100 p-4">
+      {' '}
+      {/* min-h-screen : Container takes atleast full height of the screen , flex and justify center makes sure the content is centred*/}
       <div className="flex flex-col lg:flex-row max-w-screen-lg w-full bg-white rounded-lg shadow-lg overflow-hidden">
+        {' '}
+        {/* Default is flex-col(Stack the image and text container on top of each other) and when the screen size is past the breakpoint(lg : flex-row) , the display is changed to flex-row (next to each other on larger screens). max-w-screen-lg ensures the container is responsive and never exceeds the width of larger screen but is of full width of the parent container*/}
         <div className="relative flex-1 lg:max-h-screen flex justify-center items-center">
+          {' '}
+          {/* Limits the height of the container to the height of the screen on lg screen , centres the image within the container*/}
           <img
             src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/images/${imageUrl[currentImageIndex]}`}
             alt={title}
             className="object-cover max-h-full w-full h-full"
             style={{ objectFit: 'cover' }}
-          />
+          />{' '}
+          {/* Ensures the image covers the container without distortion , maintaining aspect ratio*/}
           <button
             onClick={handlePrevious}
             className="absolute left-0 top-1/2 transform -translate-y-1/2 p-2 rounded-full text-gray-500 bg-black bg-opacity-50 hover:bg-opacity-75 focus:outline-none"
@@ -106,6 +113,8 @@ const PostPage: React.FC<Post> = ({
           &#x2715;
         </button>
         <div className="flex-1 lg:max-h-screen p-6 overflow-y-auto">
+          {' '}
+          {/* Limits the height of the container to the height of the screen on lg screen , adds padding to the container , adds scroll bar when the content exceeds the height of the container*/}
           <h2 className="text-2xl font-bold mb-2">{title}</h2>
           <div className="text-gray-700 mb-4">
             <Linkify componentDecorator={linkDecorator}>{description}</Linkify>
