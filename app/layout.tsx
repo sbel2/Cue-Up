@@ -4,12 +4,13 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Script from 'next/script'
+import Search from '@/components/search';
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: "Citale",
-  description: "Things to do in Boston",
+  title: 'Citale',
+  description: 'Things to do in Boston',
 };
 
 export default function RootLayout({
@@ -32,9 +33,18 @@ export default function RootLayout({
             })(window,document,'https://static.hotjar.com/c/hotjar-','.js?sv=');
           `}
         </Script>
-        <Script src="https://cdn.amplitude.com/libs/analytics-browser-2.7.4-min.js.gz" strategy="afterInteractive" />
-        <Script src="https://cdn.amplitude.com/libs/plugin-session-replay-browser-1.4.1-min.js.gz" strategy="afterInteractive" />
-        <Script src="https://cdn.amplitude.com/libs/plugin-autocapture-browser-0.9.0-min.js.gz" strategy="afterInteractive" />
+        <Script
+          src="https://cdn.amplitude.com/libs/analytics-browser-2.7.4-min.js.gz"
+          strategy="afterInteractive"
+        />
+        <Script
+          src="https://cdn.amplitude.com/libs/plugin-session-replay-browser-1.4.1-min.js.gz"
+          strategy="afterInteractive"
+        />
+        <Script
+          src="https://cdn.amplitude.com/libs/plugin-autocapture-browser-0.9.0-min.js.gz"
+          strategy="afterInteractive"
+        />
         <Script id="amplitude-init" strategy="afterInteractive">
           {`
             window.amplitude.add(window.sessionReplay.plugin({sampleRate: 1})).promise.then(function() {
