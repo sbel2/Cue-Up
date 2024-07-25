@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from 'react';
-import SearchBar from '@/components/SearchBar';
+import SearchBar from '@/components/searchBar';
 import { createClient } from '@supabase/supabase-js';
 
 // Initialize Supabase client
