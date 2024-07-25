@@ -77,7 +77,7 @@ export default function Home() {
   if (posts.length === 0) {
     return <p>No posts found</p>;
   }
-
+  
   return (
     <main className="min-h-screen mx-auto max-w-[100rem] overflow-x-hidden">
       <div className="px-2 pb-10 md:px-10 md:pb-20">
