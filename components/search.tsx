@@ -10,7 +10,8 @@ import {
   CommandSeparator,
   CommandShortcut,
 } from '@/components/ui/command';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 
 interface SearchProps {
   data: { value: string; label: string }[];
@@ -19,6 +20,12 @@ interface SearchProps {
 export default function Search({ data }: SearchProps) {
   const [open, setOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
+  const router = useRouter();
+
+  const runCommand = useCallback((command: () => unknown) => {
+    setOpen(false);
+    command();
+  }, []);
 
   const handleValueChange = (value: string) => {
     setInputValue(value);
@@ -30,7 +37,6 @@ export default function Search({ data }: SearchProps) {
         command.label.toLowerCase().includes(inputValue.toLowerCase()),
       )
     : [];
-  console.log('filteredCommands', filteredCommands);
   return (
     <Command className="rounded-lg border shadow-md">
       <CommandInput
@@ -42,7 +48,15 @@ export default function Search({ data }: SearchProps) {
           {open &&
             filteredCommands.length > 0 &&
             filteredCommands.map((command) => (
-              <CommandItem key={command.value} value={command.value}>
+              <CommandItem
+                key={command.value}
+                value={command.label}
+                onSelect={() => {
+                  runCommand(() => {
+                    router.push(`/events/${command.value}` as string);
+                  });
+                }}
+              >
                 {command.label}
               </CommandItem>
             ))}

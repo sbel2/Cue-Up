@@ -1,11 +1,23 @@
 import Link from "next/link";
 import Image from "next/legacy/image";
 import Search from './search';
+import { cookies } from 'next/headers';
+import { createClient } from '@/supabase/server';
 
-export default function Header({ font }: { font?: string }) {
-  const commands = [
-    // Implement mock data
-  ];
+export default async function Header({ font }: { font?: string }) {
+  const cookieStore = cookies();
+  const supabase = createClient(cookieStore);
+  const { data: posts, error } = await supabase.from('posts').select();
+  if (!posts) {
+    return <p>No data found</p>;
+  }
+  const data: any = [];
+  posts.map((post) => {
+    data.push({
+      value: post.post_id.toString(),
+      label: post.title + ' ' + post.description,
+    });
+  });
   return (
     <header className="py-10 pb-4 bg-gray-952 ml-2">
       <div className="max-w- [100rem] px-12 mx-auto flex justify-between">
@@ -18,7 +30,7 @@ export default function Header({ font }: { font?: string }) {
             layout="fixed"
           />
         </Link>
-        <Search data={commands} />
+        <Search data={data} />
       </div>
     </header>
   );
