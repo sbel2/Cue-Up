@@ -1,7 +1,23 @@
 import Link from "next/link";
 import Image from "next/legacy/image";
+import Search from './search';
+import { cookies } from 'next/headers';
+import { createClient } from '@/supabase/server';
 
-export default function Header({ font }: { font?: string }) {
+export default async function Header({ font }: { font?: string }) {
+  const cookieStore = cookies();
+  const supabase = createClient(cookieStore);
+  const { data: posts, error } = await supabase.from('posts').select();
+  if (!posts) {
+    return <p>No data found</p>;
+  }
+  const data: any = [];
+  posts.map((post) => {
+    data.push({
+      value: post.post_id.toString(),
+      label: post.title,
+    });
+  });
   return (
     <header className="py-2 md:py-7 pt-7 md:pt-10 bg-gray-952">
       <div className="max-w-[100rem] px-5 md:px-10 mx-auto flex justify-between items-center">
@@ -14,6 +30,7 @@ export default function Header({ font }: { font?: string }) {
             priority // Ensures the image is prioritized for loading
           />
         </Link>
+        <Search data={data} />
         <a
           href="https://forms.gle/fr4anWBWRkeCEgSN6"
           target="_blank"
