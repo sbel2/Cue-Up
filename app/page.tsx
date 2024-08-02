@@ -1,33 +1,75 @@
+"use client";
+import React, { useState, useEffect } from 'react';
 import Card from "@/components/card";
+import SearchBar from '@/components/searchBar';
 import { createClient } from "@/supabase/client";
-import { cookies } from "next/headers";
 
-export default async function Home() {
-  const cookieStore = cookies();
+export default function Home() {
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [searchResults, setSearchResults] = useState(null);
   const supabase = createClient();
 
-  const { data: posts, error } = await supabase.from("posts").select();
+  useEffect(() => {
+    fetchPosts();
+  }, []);
 
-  if (error) {
-    return <p>Error loading posts</p>;
+  const fetchPosts = async () => {
+    setLoading(true);
+    const { data, error } = await supabase.from("posts").select();
+    if (error) {
+      console.error("Error loading posts:", error);
+    } else {
+      setPosts(data || []);
+    }
+    setLoading(false);
+  };
+
+  const handleSearch = async (query: string) => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('posts')
+        .select('*')
+        .ilike('title', `%${query}%`);
+
+      if (error) {
+        console.error('Error fetching posts:', error);
+      } else {
+        setSearchResults(data);
+      }
+    } catch (error) {
+      console.error('Unexpected error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const displayPosts = searchResults || posts;
+
+  if (loading) {
+    return <p>Loading...</p>;
   }
 
-  if (!posts || posts.length === 0) {
+  if (!displayPosts || displayPosts.length === 0) {
     return <p>No posts found</p>;
   }
 
   return (
     <main className="min-h-screen mx-auto max-w-[100rem] overflow-x-hidden">
       <div className="px-12 pb-20">
+        <div className="mb-8">
+          <SearchBar onSearch={handleSearch} />
+        </div>
         <div className="flex flex-col xl:flex-row xl:gap-40 border-radius:10px">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {posts.map((post) => (
+            {displayPosts.map((post) => (
               <Card 
-                key={post.post_id.toString()} // Convert post_id to string if it is a number
-                post_id={post.post_id.toString()} // Ensure post_id is passed as a string
+                key={post.post_id.toString()}
+                post_id={post.post_id.toString()}
                 title={post.title}
                 description={post.description}
-                imageUrl={post.imageUrl} // Ensure imageUrl is an array of strings
+                imageUrl={post.imageUrl}
               />
             ))}
           </div>
